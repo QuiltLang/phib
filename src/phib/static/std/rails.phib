@@ -1,0 +1,31 @@
+// std/rails: ingot, log, ingot lay track; logs and ingots build a cart,
+// which rolls along the track carrying whatever rides it, and wears out.
+use std/frog
+
+type Ground += Rail | Cart(face: Dir, wear: Nat<100>)
+pattern floor += Rail | Cart
+pattern offtrack = !Rail
+reg cart = 24
+
+group 4
+recipe rail "Lay rail"
+  Grass / Loose(Ingot, _)  Grass / Loose(Log, _)  Grass / Loose(Ingot, _)  ->  Rail / Empty  Rail / Empty  Rail / Empty
+recipe build "Build a cart"
+  Loose(Log, _)  Rail / Loose(Ingot, _)  ->  Empty  Cart(E, 0) / Empty
+  Loose(Log, _)  Loose(Ingot, _)         ->  Empty  Empty
+recipe drive "Drive"
+  Cart(E, n) / x  Rail / Empty  ->  Rail / Empty  Cart(E, n + 1) / x
+  where n < cart
+recipe shove "Shove"
+  Cart(E, n) / x  Rail / loose  Rail / Empty  ->  Rail / Empty  Cart(E, n + 1) / x  * / loose
+  where n < cart
+recipe turn "Turn back"
+  Cart(E, n)  offtrack  ->  Cart(W, n)  *
+recipe wear "Worn out"
+  Cart(_, n)  ->  Rail
+  where n >= cart
+
+legend ground = = Rail
+legend ground c = Cart(E, 0)
+look Rail model "rail"
+look Cart model "cart"

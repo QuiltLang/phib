@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Test Phib: the engine's tests, and that the Quilt-expanded modules are fresh.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+node --test tests/*.test.mjs
+quilt/gen.sh --check

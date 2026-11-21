@@ -1,0 +1,28 @@
+// Starships, a Generations rule found by searching for ones that stay busy
+// (B26/S568, four states): an Off cell with two or six On neighbours turns
+// On, an On cell with five, six or eight stays On, and any other On cell
+// fades, through Fading and Faint, back to Off. From noise the board clears
+// in a few hundred ticks into a dark sky full of ships: small gliders, big
+// arrowheads, and long trains that lay rows of sparks behind them.
+
+type Star = Off | On | Fading | Faint
+cell Star
+look Off model "grass"
+look On model "grass/tree"
+look Fading model "grass/trail"
+look Faint model "grass/trail"
+
+fun next : Star -> Nat<9> -> Star
+  | Off, 2 | Off, 6 => On
+  | On, 5 | On, 6 | On, 8 => On
+  | On, _ => Fading
+  | Fading, _ => Faint
+  | _, _ => Off
+
+recipe star "Starships"
+  a  b  c  ->  *  *                                         *
+  d  x  e  ->  *  next(x, count(On, [a, b, c, d, e, f, g, h]))  *
+  f  g  h  ->  *  *                                         *
+
+legend . = Off
+legend # = On

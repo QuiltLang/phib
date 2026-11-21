@@ -1,0 +1,23 @@
+// Rock, paper, scissors, a cyclic automaton: a cell turns into what beats
+// it when at least three of its eight neighbours already have. From noise
+// it grows spirals that chase each other's tails forever.
+
+type Hand = Rock | Paper | Scissors
+cell Hand
+look Rock model "grass/rock"
+look Paper model "grass"
+look Scissors model "grass/trail"
+
+fun beats : Hand -> Hand
+  | Rock => Paper
+  | Paper => Scissors
+  | Scissors => Rock
+
+recipe rps "Beaten"
+  a  b  c  ->  *  *                                                                         *
+  d  x  e  ->  *  if count(beats(x), [a, b, c, d, e, f, g, h]) >= 3 then beats(x) else x  *
+  f  g  h  ->  *  *                                                                         *
+
+legend r = Rock
+legend p = Paper
+legend s = Scissors

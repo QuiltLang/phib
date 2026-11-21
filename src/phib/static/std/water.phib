@@ -1,0 +1,114 @@
+// std/water: logs make rafts, stones make fords, rafts drift with the
+// current, and metal sinks. A river's flow is a Dir on its water.
+//
+// A raft on a current drifts into open water every tick, whatever Phibber
+// does: it claims the cell it drifts into in group 0, before anything else,
+// and leaves its own in group 6, last. Phibber on one rides it; hopping off,
+// he goes where his hop takes him; hopping on, he lands where it drifts to.
+// What isn't open water (a bank, a ford, a raft that's stuck) stops it, and
+// so does what snags it (a game's own: nothing here).
+use std/frog
+
+type Ground += Water(flow: Dir?) | Raft(flow: Dir?) | Ford
+pattern floor += Raft | Ford
+pattern metal = Loose(Ore | Ingot, _)
+pattern drifting += Raft(N) | Raft(E) | Raft(S) | Raft(W)
+pattern hopper = Frog(_, Hop)
+pattern snags = !_
+// What a raft drifts into (a host's module may add the raft ahead, which drifts on
+// too), and into or past (and the overpass and tunnel).
+pattern onward = Water
+pattern stream = onward
+
+// The raft takes the water's flow, and leaves its own behind, so a raft
+// follows the river round its bends.
+// What's on it goes along, but Phibber mid-hop: his hop says where he goes.
+group 0
+recipe drift "Drift"
+  Raft(E) / x@!(Empty | hopper)  Water(f) / !snags  ->  *  Raft(f) / x
+recipe driftBare "Drift"
+  Raft(E) / (Empty | hopper)  Water(f) / !snags  ->  *  Raft(f)
+
+// Onto a raft, by hop or superhop, Phibber lands where it drifts to: on
+// ahead, or across his way either side. He and the raft
+// move at once, and neither waits for the other.
+group 1
+recipe board "Onto a log"
+  Frog(E, Hop(false))  Raft(E) / Empty  onward  ->  Empty  *  * / Frog(E, Sit)
+recipe boardLeft "Onto a log drifting left"
+  *                    onward      ->  *      * / Frog(E, Sit)
+  Frog(E, Hop(false))  Raft(N) / Empty   ->  Empty  *
+recipe boardRight "Onto a log drifting right"
+  Frog(E, Hop(false))  Raft(S) / Empty   ->  Empty  *
+  *                    onward      ->  *      * / Frog(E, Sit)
+recipe leapBoard "Superhop onto a log" in superhop
+  Frog(E, Hop(true))  hold / !tall  Raft(E) / Empty  onward  ->  Empty  *  *  * / Frog(E, Sit)
+recipe leapBoardLeft "Superhop onto a log drifting left" in superhop
+  *                   *             onward     ->  *      *  * / Frog(E, Sit)
+  Frog(E, Hop(true))  hold / !tall  Raft(N) / Empty  ->  Empty  *  *
+recipe leapBoardRight "Superhop onto a log drifting right" in superhop
+  Frog(E, Hop(true))  hold / !tall  Raft(S) / Empty  ->  Empty  *  *
+  *                   *             onward     ->  *      *  * / Frog(E, Sit)
+
+// Into the water just as a raft drifts in, by hop or superhop: he lands on
+// it, as it lands there too.
+recipe onto "Onto a log as it drifts in"
+  Raft(E) / Empty  Water / Empty  Frog(W, Hop(false))  ->  *  * / Frog(W, Sit)  Empty
+recipe ontoLeft "Onto a log as it drifts in, from the side"
+  *                Frog(S, Hop(false))  ->  *  Empty
+  Raft(E) / Empty  Water / Empty        ->  *  * / Frog(S, Sit)
+recipe ontoRight "Onto a log as it drifts in, from the side"
+  Raft(E) / Empty  Water / Empty        ->  *  * / Frog(N, Sit)
+  *                Frog(N, Hop(false))  ->  *  Empty
+recipe leapOnto "Superhop onto a log as it drifts in" in superhop
+  Raft(E) / Empty  Water / Empty  hold / !tall  Frog(W, Hop(true))  ->  *  * / Frog(W, Sit)  *  Empty
+recipe leapOntoLeft "Superhop onto a log as it drifts in, from the side" in superhop
+  *                Frog(S, Hop(true))  ->  *  Empty
+  *                hold / !tall        ->  *  *
+  Raft(E) / Empty  Water / Empty       ->  *  * / Frog(S, Sit)
+recipe leapOntoRight "Superhop onto a log as it drifts in, from the side" in superhop
+  Raft(E) / Empty  Water / Empty       ->  *  * / Frog(N, Sit)
+  *                hold / !tall        ->  *  *
+  *                Frog(N, Hop(true))  ->  *  Empty
+
+// On a raft, a hop on ahead into open water, where the raft drifts too:
+// he comes down on it.
+recipe hopOn "Hop on with the log"
+  Raft(E) / Frog(E, Hop(false))  Water / Empty  ->  * / Empty  * / Frog(E, Sit)
+
+// A hop from a raft that goes nowhere: he rides it on.
+group 3
+recipe ride "Ride on"
+  Raft(E) / Frog(h, Hop)  onward  ->  * / Empty  * / Frog(h, Sit)
+
+group 4
+recipe raft "Raft"
+  Water(f) / Loose(Log, _)  ->  Raft(f) / Empty
+recipe ford "Ford"
+  Water / Loose(Stone, _)  ->  Ford / Empty
+recipe sink "Sink"
+  Water / metal  ->  * / Empty
+// Left on open water (a walk onto a raft that drifted off with no board to
+// catch him, as into a tunnel): he's in the river.
+recipe adrift "In the river"
+  Water / Frog(_, Sit)  ->  * / Empty
+
+// What a raft leaves: water flowing its way. Last, so whatever drifted in
+// (the raft behind) keeps the cell.
+group 6
+recipe wake "Drift on"
+  Raft(E)  stream  ->  Water(E)  *
+recipe unload "Drift on"
+  Raft(E) / !(Empty | hopper)  stream  ->  * / Empty  *
+
+legend ground ~ = Water(none)
+legend ground ^ = Water(N)
+legend ground > = Water(E)
+legend ground v = Water(S)
+legend ground < = Water(W)
+legend ground r = Raft(none)
+legend ground f = Ford
+
+look Water model "water"
+look Raft model "raft"
+look Ford model "ford"

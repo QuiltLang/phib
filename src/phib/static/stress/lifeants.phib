@@ -1,0 +1,46 @@
+// Life with ants on it: the board is Conway's Life, and ants walk it,
+// sowing a live cell where they leave a dead one, and clearing a live one.
+// On a dead cell an ant goes straight on, and on a live one it turns right.
+// (Langton's turns, right on dead and left on live, end with each ant in a
+// tiny loop with the Life around it: in a few thousand ticks most ants keep
+// to four cells. Straight on, they cross the board like comets, a spray of
+// Life in their wake.) The ants go first (group 0),
+// so a cell an ant leaves is the ant's to write; Life writes every other
+// cell's life (group 1), counting its neighbours' as usual. An ant blocked,
+// by the edge, another ant, or two ants stepping into one cell, turns where
+// it stands (group 2).
+
+type Life = Dead | Alive
+type Bug = Clear | Ant(face: Dir)
+cell Life / Bug
+look Dead model "grass"
+look Alive model "grass/tree"
+look Ant model "ant"
+
+fun next : Life -> Nat<9> -> Life
+  | Alive, 2 | _, 3 => Alive
+  | _, _ => Dead
+
+group 0
+recipe sow "Ant on a dead cell"
+  Dead / Ant(E)  _ / Clear  ->  Alive / Clear  * / Ant(E)
+recipe reap "Ant on a live cell"
+  Alive / Ant(E)  ->  Dead / Clear
+  _ / Clear       ->  * / Ant(S)
+
+group 1
+recipe life "Life"
+  a / _  b / _  c / _  ->  *  *                                                 *
+  d / _  x / _  e / _  ->  *  next(x, count(Alive, [a, b, c, d, e, f, g, h])) / *  *
+  f / _  g / _  h / _  ->  *  *                                                 *
+
+group 2
+recipe blocked "Ant blocked"
+  Ant(E)  ->  Ant(S)
+
+legend . = Dead / Clear
+legend # = Alive / Clear
+legend n = Dead / Ant(N)
+legend e = Dead / Ant(E)
+legend s = Dead / Ant(S)
+legend w = Dead / Ant(W)

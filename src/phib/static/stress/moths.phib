@@ -1,0 +1,54 @@
+// Moths in the weave. The cloth is a Generations rule found by searching
+// for ones that stay busy (B3/S123, three states): a Bare cell with three
+// Thread neighbours grows a Thread, a Thread with one to three stays, and
+// any other Thread frays, and next tick is Bare. From noise it boils, then
+// knits itself into a maze of stripes and stops. Moths keep it going: each
+// walks it as a Langton's ant, right on Bare, left on Thread or Frayed,
+// spinning a thread where it leaves Bare and cutting one where it doesn't.
+// Each drags a patch of boiling cloth along, and the weave mends behind it.
+// The moths go first (group 0), so a cell a moth leaves is the moth's; the
+// cloth writes every other cell (group 1). A moth blocked, by the edge,
+// another moth, or two moths stepping into one cell, turns where it stands
+// (group 2).
+
+type Cloth = Bare | Thread | Frayed
+type Bug = Clear | Moth(face: Dir)
+cell Cloth / Bug
+look Bare model "grass"
+look Thread model "grass/tree"
+look Frayed model "grass/trail"
+look Moth model "ant"
+
+fun next : Cloth -> Nat<9> -> Cloth
+  | Bare, 3 => Thread
+  | Thread, 1 | Thread, 2 | Thread, 3 => Thread
+  | Thread, _ => Frayed
+  | _, _ => Bare
+
+group 0
+recipe spin "Moth on bare cloth"
+  Bare / Moth(E)  ->  Thread / Clear
+  _ / Clear       ->  * / Moth(S)
+recipe cut "Moth on a thread"
+  _ / Clear        ->  * / Moth(N)
+  Thread / Moth(E) ->  Bare / Clear
+recipe pick "Moth on a frayed thread"
+  _ / Clear        ->  * / Moth(N)
+  Frayed / Moth(E) ->  Bare / Clear
+
+group 1
+recipe weave "The weave"
+  a / _  b / _  c / _  ->  *  *                                                  *
+  d / _  x / _  e / _  ->  *  next(x, count(Thread, [a, b, c, d, e, f, g, h])) / *  *
+  f / _  g / _  h / _  ->  *  *                                                  *
+
+group 2
+recipe blocked "Moth blocked"
+  Moth(E)  ->  Moth(S)
+
+legend . = Bare / Clear
+legend # = Thread / Clear
+legend n = Bare / Moth(N)
+legend e = Bare / Moth(E)
+legend s = Bare / Moth(S)
+legend w = Bare / Moth(W)

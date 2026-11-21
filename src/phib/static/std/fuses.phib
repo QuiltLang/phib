@@ -1,0 +1,28 @@
+// std/fuses: a torch lights a fuse, the spark runs along it, burning it
+// to ash, and sets off a charge, which blasts the rock beside it.
+use std/frog
+
+type Ground += Fuse | Ash
+type Item += Spark | Boom
+pattern floor += Fuse | Ash
+
+group 4
+recipe light "Light"
+  Fuse / Loose(Torch, _)  ->  * / Spark
+recipe spread "Spark runs"
+  Fuse / Spark  Fuse / Empty  ->  *  * / Spark
+recipe burn "Fuse burns"
+  Fuse / Spark  ->  Ash / Empty
+recipe ignite "Ignite"
+  Fuse / Spark  Loose(Charge, _)  ->  *  Boom
+recipe blast "Blast"
+  Boom  Rock  ->  Empty  Grass
+recipe fizzle "Smoke clears"
+  Boom  ->  Empty
+
+legend ground + = Fuse
+legend ground , = Ash
+look Fuse model "fuse"
+look Ash model "ash"
+look Spark model "spark"
+look Boom model "boom"

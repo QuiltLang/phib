@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0221">
+  <title>Phib</title>
+  <meta name="description" content="Phib: a language of recipes over a grid of cells. Play its puzzles, then redraw the rules.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E🐸%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="editor.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="title"><h1>Phib</h1><button id="infoOpen" class="info" aria-label="How Phib works" title="How Phib works" aria-haspopup="dialog">i</button></div>
+    <p class="lede">A world is a grid of values, and every rule of it is a <b>recipe</b>: a picture of cells before, and after. Help Phibber the frog to the lotus, then open the rules and redraw them.</p>
+    <nav id="levels" class="levels" aria-label="Puzzles"></nav>
+  </header>
+
+  <dialog id="info" class="info-box" aria-labelledby="infoTitle">
+    <h2 id="infoTitle">How Phib works</h2>
+    <p><b>A grid of values.</b> Each cell holds a term of an algebraic data type the world declares, such as <code>type Ground += Belt(face: Dir)</code>.</p>
+    <p><b>Rewrite rules.</b> Each recipe is a small picture: cells before, cells after, with variables that bind parts of terms. Every tick, each recipe that matches somewhere, in any of four turns, rewrites those cells.</p>
+    <p><b>One meaning, three engines.</b> An interpreter runs the rules as written. Two compilers turn them into JavaScript and into WGSL for the GPU, their code written in <a href="https://github.com/QuiltLang/quilt">Quilt</a>. All three must make the same boards; the stress test checks.</p>
+    <form method="dialog"><button class="go" autofocus>Got it</button></form>
+  </dialog>
+
+  <main class="layout">
+    <section id="puzzleBox" class="play" aria-label="The puzzle">
+      <h2 id="name"></h2>
+      <p id="intro" class="intro"></p>
+      <details id="hintBox"><summary>Hint</summary><p id="hint"></p></details>
+      <div id="stage" class="stage">
+        <canvas id="board" tabindex="0" aria-label="The board. Arrow keys hop, W waits."></canvas>
+        <div id="win" class="win" role="dialog" aria-live="polite" hidden>
+          <b>Solved!</b> <span id="winText"></span>
+          <span class="win-buttons"><button id="winNext" class="go">Next puzzle ⏎</button><button id="winStay">Stay</button></span>
+        </div>
+      </div>
+      <div class="controls">
+        <div id="pad" class="pad" aria-label="Move">
+          <button data-d="N" class="u" aria-label="Up">▲</button>
+          <button data-d="W" class="l" aria-label="Left">◀</button>
+          <button data-d="S" class="d" aria-label="Down">▼</button>
+          <button data-d="E" class="r" aria-label="Right">▶</button>
+        </div>
+        <div class="row">
+          <button id="wait" title="Wait a tick (W)">Wait <kbd>W</kbd></button>
+          <button id="undo" title="Undo (Z)">Undo <kbd>Z</kbd></button>
+          <button id="restart" title="Restart (R)">Restart <kbd>R</kbd></button>
+        </div>
+        <p id="status" class="note"></p>
+      </div>
+      <p class="note">Arrows or a tap beside Phibber hop, W waits, Z undoes, R restarts.</p>
+    </section>
+
+    <section id="stressBox" class="play" aria-label="The stress test" hidden>
+      <h2 id="stressName">Stress test: Life</h2>
+      <p class="intro"><span id="stressAbout"></span> Its recipes are in Recipes. Here it runs on a big random board, by each of Phib's engines: the interpreter, the compiler to JavaScript, and the compiler to WGSL, on your GPU. Compare checks that all three make the same boards, then times them.</p>
+      <div class="controls">
+        <label class="row">World <select id="stressPreset"></select></label>
+        <label class="row">Size <select id="stressSize"></select></label>
+        <span id="stressEngines" class="row" role="group" aria-label="Engine"></span>
+        <span class="row">
+          <button id="stressPlay" class="go">Play</button>
+          <button id="stressReset" title="A new random board">New board</button>
+          <button id="stressCompare" title="Check, then time, every engine">Compare engines</button>
+        </span>
+      </div>
+      <div class="stage stress-stage">
+        <canvas id="stressCanvas" aria-label="The board, a pixel a cell"></canvas>
+        <canvas id="stressPixels" aria-label="The board on the GPU, a pixel a cell" hidden></canvas>
+      </div>
+      <p id="stressStats" class="note" aria-live="polite"></p>
+      <p class="note">At 512² and up the interpreter takes seconds a tick, so Compare holds the page that long while it times it.</p>
+      <table id="stressResults" class="results" hidden>
+        <thead><tr><th>Engine</th><th>Same boards</th><th>ms a tick</th><th>Ticks/s</th><th>Speedup</th><th>Compile</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <aside class="side" aria-label="The rules">
+      <div class="side-head">
+        <h2>Recipes</h2>
+        <span class="row">
+          <button id="editing" aria-pressed="false" title="Redraw the world's recipes">Edit the rules</button>
+          <button id="restore" class="sm" hidden>Undo my edits</button>
+        </span>
+      </div>
+      <p class="note">Each recipe rewrites the cells on its left into those on its right, in any of four turns. A card lights up when its recipe fires.</p>
+      <div id="paletteBox" hidden><h3>Palette</h3><div id="palette"></div></div>
+      <div id="rules"></div>
+    </aside>
+  </main>
+</body>
+</html>

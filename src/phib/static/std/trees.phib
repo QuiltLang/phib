@@ -1,0 +1,12 @@
+// std/trees: a seed on grass grows into a tree in `grow` ticks.
+use std/frog
+
+reg grow = 6
+
+group 4
+recipe sprout "Seed sprouts"
+  Grass / Loose(Seed(n), f)  ->  * / Loose(Seed(n + 1), f)
+  where n < grow
+recipe grow "Tree grows"
+  Grass / Loose(Seed(n), _)  ->  * / Tree(0)
+  where n >= grow

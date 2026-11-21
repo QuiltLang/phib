@@ -1,0 +1,23 @@
+// Brian's Brain, in one recipe: an Off cell with exactly two On
+// neighbours turns On, an On cell starts Dying, and a Dying one goes Off.
+// Nothing stays on, so it never settles: gliders everywhere.
+
+type Brain = Off | On | Dying
+cell Brain
+look Off model "grass"
+look On model "grass/tree"
+look Dying model "grass/trail"
+
+fun next : Brain -> Nat<9> -> Brain
+  | Off, 2 => On
+  | On, _ => Dying
+  | _, _ => Off
+
+recipe brain "Brian's Brain"
+  a  b  c  ->  *  *                                         *
+  d  x  e  ->  *  next(x, count(On, [a, b, c, d, e, f, g, h]))  *
+  f  g  h  ->  *  *                                         *
+
+legend . = Off
+legend # = On
+legend - = Dying

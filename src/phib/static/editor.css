@@ -1,0 +1,84 @@
+/* Phib's editor: recipes drawn cell by cell as values, their text in
+   colour, and the palette of the world's types. A page defines the colours
+   it uses (--bg, --panel-2, --line, --text, --muted, --pink, --cyan,
+   --purple, --yellow, --green, --lotus, --mono). */
+
+/* A recipe card. */
+.recipe { background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px; padding: 7px 9px; display: flex; flex-direction: column; gap: 5px; min-width: 0; transition: border-color .15s, background .15s, box-shadow .15s; }
+.recipe .hd { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; font-weight: 700; }
+.recipe .hd span { color: var(--muted); font-weight: 400; font-size: 11px; }
+.recipe p { margin: 0; color: var(--muted); font-size: 12px; }
+.recipe canvas { border-radius: 4px; align-self: flex-start; }
+.recipe.lit { border-color: var(--yellow); box-shadow: 0 0 12px rgba(255, 251, 150, .35); }
+
+#rules { display: flex; flex-direction: column; gap: 6px; }
+#rules > h3 { margin-bottom: 0; }
+.mono, .brush-text, .cellbox input, .rtext, .rsrc { font-family: var(--mono); }
+
+/* The palette: a row of values per layer, and the brush. */
+#paletteBox { position: sticky; top: -12px; z-index: 2; background: #12062c; border: 1px solid var(--line); border-radius: 10px; padding: 6px 9px 8px; }
+#paletteBox h3 { margin-top: 2px; }
+.pal-row { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; margin-top: 5px; }
+.pal-layer { width: 58px; font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--cyan); }
+.swatch { padding: 2px; display: inline-flex; flex-direction: column; align-items: center; gap: 1px; border-radius: 6px; font-size: 10.5px; line-height: 1; background: var(--bg); }
+.swatch canvas { border-radius: 4px; }
+.swatch.on { border-color: var(--cyan); background: #12305a; box-shadow: 0 0 10px rgba(5, 217, 232, .35); }
+.pal-var { display: inline-block; margin-top: 6px; font-size: 12px; color: var(--muted); }
+.pal-var input { width: 5ch; }
+.brush { margin-top: 6px; padding: 7px 9px; border: 1px solid var(--cyan); border-radius: 10px; background: #0f0630; box-shadow: 0 0 18px rgba(5, 217, 232, .25); }
+.brush-top { display: flex; gap: 10px; align-items: center; }
+.brush-top b { color: var(--cyan); }
+.brush-text { width: 100%; margin-top: 3px; }
+.fields { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 12px; color: var(--muted); }
+
+/* Its cells, drawn one by one. */
+.recipe .meta { font-size: 11px; }
+.recipe .count { color: var(--yellow); }
+.recipe.yours { border-color: var(--lotus); }
+.recipe.yours.lit { border-color: var(--yellow); }
+.sides { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.side small { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.arrow { font-size: 22px; font-weight: 800; color: var(--pink); }
+.grid { display: grid; gap: 2px; }
+.rcell { display: block; border-radius: 3px; }
+.yours .rcell { cursor: crosshair; outline: 1px dashed rgba(240, 139, 176, .45); }
+.yours .rcell:hover { outline: 2px solid var(--cyan); }
+.tools { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.tools .hint { font-size: 11px; color: var(--muted); }
+.cellbox { font-size: 12px; color: var(--muted); }
+.cellbox input { width: 100%; margin-top: 3px; }
+.textual { padding: 4px 8px; }
+.textual summary { font-size: 11.5px; font-weight: 400; color: var(--muted); }
+.rtext { min-height: 0; margin-top: 4px; font-size: 12px; }
+.rsrc { margin: 0; font-size: 11px; color: var(--muted); white-space: pre-wrap; overflow-wrap: anywhere; }
+.err { color: var(--pink); font-size: 12px; white-space: pre-wrap; }
+.err:empty { display: none; }
+input.bad { border-color: var(--pink); }
+
+/* Code in colour (highlight.js): Phib, and the JavaScript and WGSL it
+   compiles to. */
+.tk-key, .tk-word { color: var(--pink); }
+.tk-con { color: var(--green); }
+.tk-dir, .tk-type, .tk-op, .tk-expr { color: var(--cyan); }
+.tk-any, .tk-keep { color: var(--muted); }
+.tk-layer { color: var(--pink); font-weight: 800; }
+.tk-str { color: var(--yellow); }
+.tk-num { color: var(--purple); }
+.tk-comment { color: var(--muted); font-style: italic; }
+.tk-m-wall { color: var(--muted); }
+.tk-m-water { color: var(--cyan); }
+.tk-m-frog { color: var(--green); font-weight: 800; }
+.tk-m-thing { color: var(--yellow); }
+.tk-m-dot { color: #4b3d7a; }
+/* A recipe card's text, coloured: the card's own grey is for what isn't. */
+.rsrc .tk-con, .rsrc .tk-key, .rsrc .tk-word { filter: saturate(.85); }
+
+/* An editable field drawn in colour: the coloured copy sits behind, the same
+   size, font, padding and wrapping, and the field's own text is clear. */
+.tk-field { position: relative; margin-top: 3px; }
+.tk-field > pre, .tk-field > .tk-input { box-sizing: border-box; margin: 0; font: 12px/1.4 var(--mono); padding: 4px 6px; border: 1px solid var(--line); border-radius: 7px; letter-spacing: 0; tab-size: 2; }
+.tk-field > pre { position: absolute; inset: 0; overflow: hidden; pointer-events: none; background: var(--panel-2); color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; border-color: transparent; }
+.tk-field > .tk-input { position: relative; display: block; width: 100%; background: transparent; color: transparent; caret-color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
+.tk-field > .tk-input::selection { background: rgba(5, 217, 232, .3); color: transparent; }
+.tk-field.tk-line > pre { white-space: pre; overflow-wrap: normal; }
+.tk-field.tk-line > .tk-input { white-space: pre; }

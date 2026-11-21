@@ -1,0 +1,21 @@
+// std/furnace: four stones in a square make a furnace; fuel and ore on
+// either side of it make an ingot; after `furnace` smelts it crumbles.
+use std/frog
+
+type Item += Furnace(smelts: Nat<100>)
+reg furnace = 3
+pattern fuel = Loose(Log, _)
+
+group 4
+recipe furnace "Furnace"
+  Loose(Stone, _)  Loose(Stone, _)  ->  Furnace(0)  Empty
+  Loose(Stone, _)  Loose(Stone, _)  ->  Empty       Empty
+recipe smelt "Smelt"
+  fuel  Furnace(n)  Loose(Ore, _)  ->  Empty  Furnace(n + 1)  Loose(Ingot, none)
+  where n < furnace
+recipe burnout "Burn out"
+  Furnace(n)  ->  Loose(Stone, none)
+  where n >= furnace
+
+legend item F = Furnace(0)
+look Furnace model "furnace"

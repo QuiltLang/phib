@@ -1,0 +1,16 @@
+// std/belts: a belt carries whatever is on it, Phibber included, and
+// turns it to face along the belt.
+use std/frog
+
+type Ground += Belt(face: Dir)
+pattern floor += Belt
+
+group 4
+recipe convey "Convey"
+  Belt(E) / x@!Empty  hold / Empty  ->  * / Empty  * / x { face = E }
+
+legend ground N = Belt(N)
+legend ground E = Belt(E)
+legend ground S = Belt(S)
+legend ground W = Belt(W)
+look Belt model "belt"

@@ -1,0 +1,17 @@
+// std/veins: an empty vein yields ore every `vein` ticks.
+use std/frog
+
+type Ground += Vein(wait: Nat<100>)
+pattern floor += Vein
+reg vein = 7
+
+group 4
+recipe veinwait "Vein refills"
+  Vein(n) / Empty  ->  Vein(n + 1) / *
+  where n < vein
+recipe vein "Vein yields"
+  Vein(n) / Empty  ->  Vein(0) / Loose(Ore, none)
+  where n >= vein
+
+legend ground * = Vein(0)
+look Vein model "vein"

@@ -1,0 +1,141 @@
+// Phib's puzzles: Phibber the frog's first five. Every
+// behaviour, Phibber's hops included, is a recipe you can read, and the
+// standard library's are in std/.
+use std
+
+level puzzle1 "Stepping Logs"
+intro "Phibber can’t swim. Push a log into the pond and it becomes a raft you can stand on. Reach the lotus."
+hint "The pond is two wide, so you need two rafts in a row. Push the first log in, step onto it, and push the second log from the raft."
+goal Frog at 8, 3
+// Recipes this pond can never use: nothing here makes what they need.
+without chop
+without ford sink
+without furnace smelt burnout
+without rail build drive shove turn wear
+without veinwait vein
+without toll open
+without slip slide skate stop
+without convey
+without light spread burn ignite blast fizzle
+without clone spent
+without sprout grow
+without bankore bankingot
+without antright antleft antturn
+solution "NEENESSWWSEEEEEENE"
+map
+  ##########   ..........
+  #....~~..#   ..........
+  #....~~..#   ...l......
+  #....~~..#   .@........
+  #....~~..#   ...l......
+  #....~~..#   ..........
+  ##########   ..........
+
+level puzzle2 "Ford"
+intro "A stone pushed into water fills it with a ford you can walk on. Unlike a raft, it stays put. Get the ore to the lotus."
+hint "Ore sinks if it touches water, so the ore needs dry ground or a ford all the way across. Fill the river first."
+goal Loose(Ore, _) at 7, 3
+// Recipes this pond can never use: nothing here makes what they need.
+without chop
+without drift driftBare board boardLeft boardRight leapBoard leapBoardLeft leapBoardRight onto ontoLeft ontoRight leapOnto leapOntoLeft leapOntoRight hopOn ride raft wake unload
+without smelt
+without rail build drive shove turn wear
+without veinwait vein
+without toll open
+without slip slide skate stop
+without convey
+without light spread burn ignite blast fizzle
+without clone spent
+without sprout grow
+without bankore bankingot
+without antright antleft antturn
+solution "NENESWWSE.EEEE"
+map
+  ##########   ..........
+  #...v....#   ..........
+  #...v....#   ..s.......
+  #...v....#   .@o.......
+  #...v....#   ..........
+  ##########   ..........
+
+level puzzle3 "Downstream"
+intro "Rafts on moving water drift, carrying whatever is on them. The far bank is walled off except for one landing. Ride there."
+hint "Push the log into the river at the top, step on, and wait. Hop off when you’re beside the landing."
+goal Frog at 8, 1
+// Recipes this pond can never use: nothing here makes what they need.
+without chop
+without ford sink
+without furnace smelt burnout
+without rail build drive shove turn wear
+without veinwait vein
+without toll open
+without slip slide skate stop
+without convey
+without light spread burn ignite blast fizzle
+without clone spent
+without sprout grow
+without bankore bankingot
+without antright antleft antturn
+solution "ENENNEENNNEE"
+map
+  ##########   ..........
+  #...v#...#   ..@l......
+  #...v#...#   ..........
+  #...v#...#   ..........
+  ##..v....#   ..........
+  ##..v#...#   ..........
+  ##########   ..........
+
+level puzzle4 "Smelter"
+intro "Four stones in a square make a furnace. A log and ore on opposite sides of the furnace make an ingot. Get an ingot onto the lotus."
+hint "Finish the square first: the furnace appears in its top-left corner. Then line up log, furnace, ore."
+goal Loose(Ingot, _) at 7, 3
+// Recipes this pond can never use: nothing here makes what they need.
+without chop
+without drift driftBare board boardLeft boardRight leapBoard leapBoardLeft leapBoardRight onto ontoLeft ontoRight leapOnto leapOntoLeft leapOntoRight hopOn ride raft ford sink adrift wake unload
+without veinwait vein
+without toll open
+without slip slide skate stop
+without convey
+without light spread burn ignite blast fizzle
+without clone spent
+without sprout grow
+without bankore bankingot
+without antright antleft antturn
+solution "EEWNESEENEESWWNENWNWWSSEEE"
+map
+  #########   .........
+  ##.....##   .....l...
+  #.......#   ...ss....
+  #.......#   .@s.s.o..
+  #########   .........
+
+level puzzle5 "Rail Yard"
+intro "Here the track isn’t floor: Phibber can’t hop onto it or push anything along it. Two logs beside two ingots, with the upper ingot on the track, become a cart facing away from the logs. It rolls by itself and shoves whatever is ahead. Deliver the ore to the lotus at the end of the line."
+hint "The cart appears where the upper ingot is. Build it at the start of the track, with the logs to its west."
+// Here the track isn't floor.
+pattern floor -= Rail
+goal Loose(Ore, _) at 9, 3
+// Recipes this pond can never use: nothing here makes what they need.
+without chop
+without drift driftBare board boardLeft boardRight leapBoard leapBoardLeft leapBoardRight onto ontoLeft ontoRight leapOnto leapOntoLeft leapOntoRight hopOn ride raft ford sink adrift wake unload
+without furnace smelt burnout
+without veinwait vein
+without toll open
+without slip slide skate stop
+without convey
+without light spread burn ignite blast fizzle
+without clone spent
+without sprout grow
+without bankore bankingot
+without antright antleft antturn
+solution "NEEWNWNEENESNESNNNN"
+map
+  ###########   ...........
+  #.........#   ...........
+  #.........#   ...i.......
+  #..=======#   ..l...o....
+  #.........#   ..l..i.....
+  #.........#   .@.........
+  ###########   ...........
+

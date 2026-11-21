@@ -1,0 +1,12 @@
+// std/palms: a palm fells into a log, and a superhop can't clear one.
+use std/frog
+
+type Item += Palm
+pattern tall += Palm
+
+group 2
+recipe chopPalm "Chop a palm"
+  !drifting / Frog(E, Hop)  Palm  ->  * / Frog(E, Sit)  Loose(Log, none)
+
+legend item P = Palm
+look Palm model "palm"

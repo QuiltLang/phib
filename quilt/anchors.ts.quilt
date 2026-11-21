@@ -1,0 +1,40 @@
+// Phib, the code compile.js runs: its anchor tests, written
+// with Quilt quotes. gen.sh expands this into static/anchors.js (checked in;
+// `just phib-quilt-check` holds them together), which compileWorld
+// uses as its writer.
+//
+// The first quote's `⟨str⟩` makes every quote here a host string, spliced as
+// template literals (Quilt's quote representations), so the expansion needs
+// no runtime; the quotes after it, and those inside its unquotes, inherit it.
+// build.mjs also builds it as `ts↖` (⟨cst⟩, a syntax tree) and `ts⟨qt⟩↖` (a
+// flat term), by changing that one tag, for bench.mjs to measure against the
+// template writer this replaced.
+export const writeQuilt = (...a) => String(source(...a));
+
+export function source(rks, entries, L, order) {
+  return ts⟨str⟩↖
+    // The world's recipes as anchor tests, ↙rks.length↘ of them (each recipe at its four turns).
+    // T[e] is keyed cell e's table over value ids (1: it can match); ids is the board's ids, ↙L↘ a cell.
+    ↙←(rks.map((rk) => anchor(rk, entries, L, order)))↘
+
+  ↗;
+}
+
+// One recipe at one turn: a test of its anchor (its keyed cells' tables, in
+// `order(rk)`) and the key its outcome is kept under.
+function anchor(rk, entries, L, order) {
+  const r = rk.info.r;
+  const tests = order(rk).map((e) => ↖T[↙e↘][ids[o + ↙entries[e].off↘]] === 1↗);
+  const test = tests.length ? ↖↙←(tests, " && ")↘↗ : ↖true↗;
+  const ids = rk.full.map((f) => ↖ids[o + ↙f.off↘]↗);
+  const key =
+    ids.length === 2 ? ↖↙ids[0]↘ * 67108864 + ↙ids[1]↘↗ : ids.length ? ↖↙←(ids, ` + "," + `)↘↗ : ↖0↗;
+  const name = String(r.name ?? "").replace(/[\n"\\]/g, " ");
+  return ↖
+    // ↙r.id↘ "↙name↘", turned ↙rk.k↘: ↙r.h↘×↙r.wd↘, ↙rk.bw↘×↙rk.bh↘ on the board
+    F[↙rk.i↘] = {
+      test: (a) => { const o = a * ↙L↘; return ↙test↘; },
+      key: (a) => { const o = a * ↙L↘; return ↙key↘; },
+    };
+  ↗;
+}

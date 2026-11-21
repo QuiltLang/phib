@@ -1,0 +1,15 @@
+// std/cloners: a cloner copies what's beside it onto its other side,
+// three times.
+use std/frog
+
+type Item += Cloner(copies: Nat<4>)
+
+group 4
+recipe clone "Clone"
+  loose  Cloner(n)  hold / Empty  ->  *  Cloner(n + 1)  * / loose
+  where n < 3
+recipe spent "Cloner wears out"
+  Cloner(3)  ->  Empty
+
+legend item K = Cloner(0)
+look Cloner model "cloner"

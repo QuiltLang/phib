@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Run Phib's demo, its five puzzles and the stress test, at http://127.0.0.1:8150.
+# Usage: main [--host HOST] [--port PORT]
+set -euo pipefail
+exec uv run --project "$(dirname "$0")/.." phib "$@"

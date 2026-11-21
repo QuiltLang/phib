@@ -1,0 +1,87 @@
+/* Phib's page: the puzzle on the left, the rules on the right (stacked on a
+   phone). editor.css draws the recipe cards and the palette. */
+:root {
+  color-scheme: dark;
+  --bg: #0d0221;
+  --panel: #160a33;
+  --panel-2: #1a0e3f;
+  --line: #4a2c8f;
+  --text: #ece6ff;
+  --muted: #a397cf;
+  --pink: #ff2a6d;
+  --cyan: #05d9e8;
+  --purple: #b967ff;
+  --yellow: #fffb96;
+  --green: #3dffa2;
+  --lotus: #f08bb0;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 var(--sans); }
+button { font: inherit; color: inherit; cursor: pointer; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px; touch-action: manipulation; }
+button:hover { border-color: var(--purple); }
+button:focus-visible, canvas:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+button[aria-pressed="true"], button[aria-current="true"] { border-color: var(--cyan); background: #12305a; }
+button.go { background: var(--pink); border-color: var(--pink); color: #fff; font-weight: 700; }
+button.sm { padding: 2px 7px; font-size: 12px; }
+input, textarea, select { font: inherit; color: inherit; background: var(--panel-2); border: 1px solid var(--line); border-radius: 7px; padding: 4px 6px; }
+kbd { font: 11px var(--mono); color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+details { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; }
+details p { margin: 6px 0 2px; color: var(--muted); }
+h1 { margin: 0; font-size: 28px; letter-spacing: .02em; color: var(--yellow); }
+h2 { margin: 0 0 4px; font-size: 17px; color: var(--yellow); }
+h3 { margin: 10px 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--cyan); }
+.note { margin: 6px 0 0; color: var(--muted); font-size: 12.5px; }
+
+.title { display: flex; align-items: center; gap: 10px; }
+button.info { width: 24px; height: 24px; padding: 0; border-radius: 50%; font: italic 700 14px/1 Georgia, serif; color: var(--cyan); border-color: var(--cyan); }
+.info-box { max-width: min(440px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; padding: 14px 16px; color: var(--text); background: var(--panel); border: 1px solid var(--cyan); border-radius: 12px; font-size: 13.5px; }
+.info-box::backdrop { background: rgba(5, 0, 15, .7); }
+.info-box p { margin: 0 0 8px; }
+.info-box b { color: var(--yellow); }
+.info-box code { font: 12.5px var(--mono); color: var(--green); white-space: nowrap; }
+.info-box a { color: var(--cyan); }
+.info-box form { display: flex; justify-content: flex-end; margin-top: 4px; }
+
+.top { max-width: 1200px; margin: 0 auto; padding: 18px 16px 6px; }
+.lede { margin: 4px 0 10px; color: var(--muted); max-width: 62ch; }
+.lede b { color: var(--text); }
+.levels { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.layout { max-width: 1200px; margin: 0 auto; padding: 10px 16px 40px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 400px); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+.intro { margin: 0 0 8px; }
+.stage { position: relative; height: min(62vh, 560px); margin-top: 10px; display: grid; place-items: center; background: #090118; border: 1px solid var(--line); border-radius: 12px; padding: 8px; }
+.stage canvas { display: block; image-rendering: auto; border-radius: 4px; }
+.win { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: center; padding: 8px 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--green); box-shadow: 0 0 18px rgba(61, 255, 162, .3); }
+.win b { color: var(--green); }
+.win-buttons { display: flex; gap: 6px; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; margin-top: 10px; }
+.row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pad { display: grid; grid-template-columns: repeat(3, 40px); grid-template-rows: repeat(2, 34px); gap: 4px; }
+.pad button { padding: 0; }
+.pad .u { grid-column: 2; grid-row: 1; }
+.pad .l { grid-column: 1; grid-row: 2; }
+.pad .d { grid-column: 2; grid-row: 2; }
+.pad .r { grid-column: 3; grid-row: 2; }
+
+.side { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; max-height: calc(100vh - 40px); overflow-y: auto; position: sticky; top: 16px; }
+@media (max-width: 860px) { .side { position: static; max-height: none; } }
+.side-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+#rules { margin-top: 10px; }
+
+/* The stress test: the board a pixel a cell, as big as fits, and the timings. */
+select { font: inherit; }
+.stress-stage canvas { width: auto; height: 100%; max-width: 100%; aspect-ratio: 1; image-rendering: pixelated; }
+.results { margin-top: 10px; border-collapse: collapse; font-size: 13px; width: 100%; }
+.results th, .results td { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: right; }
+.results th:first-child, .results td:first-child { text-align: left; }
+.results th { color: var(--cyan); font-weight: 600; }
+.results .ok { color: var(--green); }
+.results .bad { color: var(--pink); }
+.results .best { color: var(--yellow); font-weight: 700; }

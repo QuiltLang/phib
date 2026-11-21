@@ -1,0 +1,12 @@
+// std/boats: open sea nothing drifts on, which a frog on a raft rows
+// across, one cell a press.
+use std/water
+
+type Ground += Sea
+
+group 2
+recipe row "Row"
+  r@Raft / Frog(E, Hop)  Sea / Empty  ->  Sea / Empty  r / Frog(E, Sit)
+
+legend ground ≈ = Sea
+look Sea model "water"

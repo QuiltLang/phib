@@ -1,0 +1,32 @@
+// Langton's ants, many of them: on white an ant turns right, on black it
+// turns left; it flips the colour it leaves and steps on. A cell is two
+// layers, its shade and the ant on it, so an ant's step claims the shade it
+// flips and the two places it moves between, and nothing else. Two ants
+// stepping into one cell clash, and neither goes: in a later group, each
+// turns where it stands instead, as does an ant facing an edge or another
+// ant. Phib's stress test scatters them on a big white board.
+
+type Shade = White | Black
+type Bug = Clear | Ant(face: Dir)
+cell Shade / Bug
+look White model "grass"
+look Black model "grass/trail"
+look Ant model "ant"
+
+group 0
+recipe right "Ant on white"
+  White / Ant(E)  ->  Black / Clear
+  _ / Clear       ->  * / Ant(S)
+recipe left "Ant on black"
+  _ / Clear       ->  * / Ant(N)
+  Black / Ant(E)  ->  White / Clear
+
+group 1
+recipe blocked "Ant blocked"
+  Ant(E)  ->  Ant(S)
+
+legend . = White / Clear
+legend n = White / Ant(N)
+legend e = White / Ant(E)
+legend s = White / Ant(S)
+legend w = White / Ant(W)

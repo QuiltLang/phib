@@ -1,0 +1,16 @@
+// std/gates: walk two ingots into a gate and it opens.
+use std/frog
+
+type Item += Gate(paid: Nat<3>)
+
+group 2
+recipe toll "Pay toll"
+  !drifting / Frog(E, Hop)  floor / Loose(Ingot, _)  Gate(n)  ->  * / Frog(E, Sit)  Empty  Gate(n + 1)
+  where n < 2
+
+group 4
+recipe open "Gate opens"
+  Gate(2)  ->  Empty
+
+legend item G = Gate(0)
+look Gate model "gate"

@@ -1,0 +1,27 @@
+// std/ants: Langton's ant. On grass it turns right and leaves a trail; on
+// its trail it turns left and wears it back to grass. Two recipes.
+use std/frog
+
+type Ground += Trail
+type Item += Ant(face: Dir)
+pattern floor += Trail
+
+group 4
+recipe antright "Ant on grass"
+  Grass / Ant(E)  ->  Trail / Empty
+  floor / Empty   ->  * / Ant(S)
+recipe antleft "Ant on trail"
+  floor / Empty   ->  * / Ant(N)
+  Trail / Ant(E)  ->  Grass / Empty
+
+group 5
+recipe antturn "Ant blocked"
+  Ant(E)  ->  Ant(S)
+
+legend ground : = Trail
+legend item ↑ = Ant(N)
+legend item → = Ant(E)
+legend item ↓ = Ant(S)
+legend item ← = Ant(W)
+look Trail model "trail"
+look Ant model "ant"

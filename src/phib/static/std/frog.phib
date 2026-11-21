@@ -1,0 +1,79 @@
+// std/frog: Phibber, and the ground and things everything else builds on.
+// A key makes him hop that way; he walks onto floor, pushes what's loose,
+// chops trees, and otherwise stays put. Every other module uses this one.
+
+// What can lie about and be pushed: Loose(what, face), facing the way it
+// was last pushed (an item on ice slides on that way).
+type Stuff = Log | Stone | Ore | Ingot | Torch | Charge | Seed(age: Nat<100>)
+type Mode = Sit | Hop(far: Bool) | Slide
+type Item = Empty | Frog(face: Dir, mode: Mode) | Loose(what: Stuff, face: Dir?) | Tree(age: Nat<100>)
+type Ground = Grass | Rock
+cell Ground / Item
+
+// Ground a frog can stand on (modules add theirs), what nothing stands on,
+// and what a superhop can't clear.
+pattern floor = Grass
+pattern wall = Rock
+pattern hold = !wall
+pattern tall = Tree
+// Ground that moves on every tick, carrying what's on it (std/water's
+// drifting rafts): nothing here. Phibber boards it rather than walking onto
+// it (std/water's Board, a group earlier, wins where it fits), superhops
+// only onto steady floor, the rest, and rides it on rather than staying put.
+pattern drifting = !_
+pattern steady = !(!floor | drifting)
+
+// Group 0 is for what moves every tick, whatever Phibber does (std/water's
+// rafts, a road's cars): it claims where it goes first, and his recipes,
+// from group 1 on, settle round it.
+
+// A superhop: Space, where a game turns this on.
+reg superhop = false
+
+group 1
+recipe key "Your key"
+  on Key(E, far)
+  Frog(_, Sit)  ->  Frog(E, Hop(far))
+recipe leap "Superhop" in superhop
+  Frog(E, Hop(true))  hold / !tall  steady / Empty  ->  Empty  *  Frog(E, Sit)
+
+group 2
+recipe hop "Walk"
+  Frog(E, Hop)  floor / Empty  ->  Empty  Frog(E, Sit)
+recipe push "Push"
+  Frog(E, Hop)  floor / loose  hold / Empty  ->  Empty  Frog(E, Sit)  loose { face = E }
+recipe push2 "Push two"
+  Frog(E, Hop)  floor / loose  loose2  hold / Empty  ->  Empty  Frog(E, Sit)  loose { face = E }  loose2 { face = E }
+recipe chop "Chop"
+  !drifting / Frog(E, Hop)  Tree  ->  * / Frog(E, Sit)  Loose(Log, none)
+
+group 3
+recipe land "Stay put"
+  !drifting / Frog(E, Hop)  ->  * / Frog(E, Sit)
+
+// The map: a ground grid and an item grid, side by side.
+legend ground . = Grass
+legend ground # = Rock
+legend item . = Empty
+legend item @ = Frog(S, Sit)
+legend item l = Loose(Log, none)
+legend item s = Loose(Stone, none)
+legend item o = Loose(Ore, none)
+legend item i = Loose(Ingot, none)
+legend item T = Loose(Torch, none)
+legend item C = Loose(Charge, none)
+legend item d = Loose(Seed(0), none)
+legend item t = Tree(0)
+
+look Grass model "grass"
+look Rock model "rock"
+look Frog model "frog"
+look Loose model "{what}"
+look Log model "log"
+look Stone model "stone"
+look Ore model "ore"
+look Ingot model "ingot"
+look Torch model "torch"
+look Charge model "charge"
+look Seed model "seed"
+look Tree model "tree"

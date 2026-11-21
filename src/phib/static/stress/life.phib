@@ -1,0 +1,22 @@
+// Conway's Life, in one recipe: a 3x3 of variables, and the middle cell
+// becomes next(x, how many of its neighbours are Alive). Every cell's match
+// overlaps its neighbours', but each writes only its own middle, so nothing
+// clashes. Phib's page runs it on a big random board (stress.js adds the
+// level), to time the engine interpreted, compiled to JavaScript, and on the GPU.
+
+type Life = Dead | Alive
+cell Life
+look Dead model "grass"
+look Alive model "grass/tree"
+
+fun next : Life -> Nat<9> -> Life
+  | Alive, 2 | _, 3 => Alive
+  | _, _ => Dead
+
+recipe life "Life"
+  a  b  c  ->  *  *                                           *
+  d  x  e  ->  *  next(x, count(Alive, [a, b, c, d, e, f, g, h]))  *
+  f  g  h  ->  *  *                                           *
+
+legend . = Dead
+legend # = Alive

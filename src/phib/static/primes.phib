@@ -1,0 +1,14 @@
+// The primes, by trial division: the row counts itself out from 2, and each
+// number n tries divisors from n - 1 down, stopping at the first that divides
+// it, its largest. It stops at I(n, 1) just when n is prime.
+type C = O | I(Nat<64>, Nat<64>)
+cell C
+recipe count
+  I(n, _)  O  ->  *  I(n + 1, n)
+recipe divide
+  I(n, d)  ->  I(n, d - 1)
+  where n mod d != 0
+map
+  2.............................................................
+legend 2 = I(2, 1)
+legend . = O

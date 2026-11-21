@@ -1,0 +1,198 @@
+// Phib on the GPU: the WGSL compile-gpu.js runs, written with Quilt quotes.
+// gen.sh expands this into static/wgsl.js (checked in; `just
+// phib-quilt-check` holds them together).
+//
+// Quilt has no WGSL grammar, so the quotes are `text`: WGSL as text, with
+// ↙…↘ for what varies and ↙←(list, sep)↘ to join. The first quote's ⟨str⟩
+// makes every quote a template literal, so the expansion needs no runtime.
+// Text quotes don't indent what they splice, as a ts quote does, so a block
+// inside a block goes in with nest(), at its line's indent; and a line whose
+// list is empty is left blank, which tidy() drops.
+
+// A table cell that matches no value.
+export const NONE = 0xffffffff;
+
+// A u32 literal.
+export const u = (n) => text⟨str⟩↖↙n >>> 0↘u↗;
+
+// Items one a line, each line after the first indented by `pad`: a block
+// spliced at a line indented by `pad`.
+const nest = (items, pad) => [...items].join("\n").replaceAll("\n", `\n${pad}`);
+// Without the lines an empty list left with nothing but their indent.
+const tidy = (s) => s.replace(/\n +(?=\n)/g, "");
+// The shader's locals: a cell's rank r0, a group's index m0, a write's slot
+// s0 and value v0. (A word right before ↙ would be read as the unquote's
+// tag, so a name is spliced whole.)
+const r = (i) => `r${i}`;
+const m = (i) => `m${i}`;
+const s = (j) => `s${j}`;
+const v = (j) => `v${j}`;
+// Conditions, all of them; none is true.
+const all = (xs) => (xs.length ? ↖↙←(xs, " && ")↘↗ : ↖true↗);
+
+// The shader: a `run` per (phase, group) case, the propose and accept
+// entry points, and `locate` (where Phibber is).
+export function wgsl(plan) {
+  const { L, dom } = plan;
+  const fills = plan.values.map((_, l) => ↖if (l == ↙u(l)↘) { if (v < ↙u(dom[l])↘) { return v; } return T[↙u(plan.fillOff[l])↘ + (v - ↙u(dom[l])↘) * ↙u(dom[l])↘ + old]; }↗);
+  const frogs = plan.values.map((_, l) => ↖T[↙u(plan.frogOff[l])↘ + A[c * ↙u(L)↘ + ↙u(l)↘]] != 0u↗);
+  const cases = plan.cases.map((C, n) => caseCode(plan, C, n));
+  return tidy(↖
+    // Phib on the GPU: ↙plan.rules.length↘ recipes, ↙plan.cases.length↘ passes a tick (compile-gpu.js).
+    struct Params { W: i32, H: i32, N: i32, gi: u32, seed: i32, tick: i32, variant: u32, kase: u32 }
+    @group(0) @binding(0) var<uniform> P: Params;
+    @group(0) @binding(1) var<storage, read> A: array<u32>;
+    @group(0) @binding(2) var<storage, read_write> B: array<u32>;
+    @group(0) @binding(3) var<storage, read_write> prop: array<atomic<u32>>;
+    @group(0) @binding(4) var<storage, read_write> conf: array<u32>;
+    @group(0) @binding(5) var<storage, read_write> taken: array<u32>;
+    @group(0) @binding(6) var<storage, read> T: array<u32>;
+    @group(0) @binding(7) var<storage, read_write> found: array<atomic<u32>>;
+
+    // terms.js's hash32, before it's divided by 2^32.
+    fn hash32(a: i32, b: i32, c: i32, d: i32) -> u32 {
+      var h = (bitcast<u32>(a) * 374761393u) ^ (bitcast<u32>(b) * 668265263u) ^ (bitcast<u32>(c) * 1442695041u) ^ (bitcast<u32>(d) * 2246822519u);
+      h = (h ^ (h >> 13u)) * 1274126177u;
+      h = (h ^ (h >> 16u)) * 2246822519u;
+      return h ^ (h >> 15u);
+    }
+
+    // The dice: T[at] says whether to roll, T[at + 1] the threshold.
+    fn chance(at: u32, hash: i32, foot: i32) -> bool {
+      if (T[at] == 0u) { return true; }
+      return hash32(P.seed, P.tick, hash, foot) < T[at + 1u];
+    }
+
+    // No earlier group has claimed this slot.
+    fn unclaimed(s: u32) -> bool {
+      let t = taken[s];
+      return t == 0u || t - 1u >= P.gi;
+    }
+
+    fn offer(s: u32, v: u32) {
+      let x = v + 1u;
+      loop {
+        let r = atomicCompareExchangeWeak(&prop[s], 0u, x);
+        if (r.exchanged) { break; }
+        if (r.old_value != 0u) {
+          if (r.old_value != x) { conf[s] = 1u; }
+          break;
+        }
+      }
+    }
+
+    // What value v (maybe with holes) makes of old, on layer l.
+    fn filled(v: u32, old: u32, l: u32) -> u32 {
+      ↙nest(fills, "  ")↘
+      return v;
+    }
+
+    fn put(s: u32, v: u32, l: u32) {
+      B[s] = filled(v, A[s], l);
+      taken[s] = P.gi + 1u;
+    }
+
+    fn run(a: i32, accept: bool) {
+      let ox = a % P.W;
+      let oy = a / P.W;
+      let o = u32(a) * ↙u(L)↘;
+      switch (P.kase) {
+        ↙nest(cases, "    ")↘
+        default: {}
+      }
+    }
+
+    @compute @workgroup_size(256) fn propose(@builtin(global_invocation_id) id: vec3u) {
+      let a = i32(id.x);
+      if (a >= P.N) { return; }
+      run(a, false);
+    }
+
+    @compute @workgroup_size(256) fn accept(@builtin(global_invocation_id) id: vec3u) {
+      let a = i32(id.x);
+      if (a >= P.N) { return; }
+      run(a, true);
+    }
+
+    // Where Phibber is: the highest cell that holds him, plus one.
+    @compute @workgroup_size(256) fn locate(@builtin(global_invocation_id) id: vec3u) {
+      let c = id.x;
+      if (i32(c) >= P.N) { return; }
+      if (↙←(frogs, " || ")↘) { atomicMax(&found[0], c + 1u); }
+    }
+
+  ↗);
+}
+
+// One (phase, group) case: its recipes, one after another.
+function caseCode(plan, C, n) {
+  return ↖
+    case ↙u(n)↘: {
+      ↙nest(C.rules.map((R) => ruleCode(plan, R)), "  ")↘
+    }
+  ↗;
+}
+
+// One recipe's block in its case: each turn in order, the lowest turn
+// that matches a footprint taking it.
+function ruleCode(plan, R) {
+  return ↖
+    { // recipe ↙R.r.id↘
+      var c0 = false;
+      var c1 = false;
+      ↙nest(R.ks.map((K) => turnCode(plan, R, K)), "  ")↘
+    }
+  ↗;
+}
+
+// One turn of a recipe: its footprint fits, its cells' ranks, its groups'
+// tables, its dice, then its writes, offered or put.
+function turnCode(plan, R, K) {
+  const { L } = plan;
+  const W = plan.w.level.W;
+  const cls = R.square ? "c0" : K.k & 1 ? "c1" : "c0";
+  const bit = R.square ? 0 : K.k & 1;
+  const off = (x, size) => (R.variants > 1 ? ↖↙u(x)↘ + P.variant * ↙u(size)↘↗ : u(x));
+  const ranks = K.cells.map((c, i) => ↖let ↙r(i)↘ = T[↙u(c.rankOff)↘ + A[o + ↙u((c.ry * W + c.rx) * L + c.l)↘]];↗);
+  const groups = K.comps.map((C, ci) => ↖let ↙m(ci)↘ = ↙←(C.cells.map((c) => ↖↙r(K.cells.indexOf(c))↘ * ↙u(c.mul)↘↗), " + ")↘;↗);
+  const writes = K.writes.map((x, j) => ↖
+    let ↙s(j)↘ = o + ↙u((x.ry * W + x.rx) * L + x.l)↘;
+    let ↙v(j)↘ = T[↙off(x.off, x.size)↘ + ↙index(K, x)↘];
+  ↗);
+  return ↖
+    if (ox <= P.W - ↙K.bw↘ && oy <= P.H - ↙K.bh↘ && T[↙off(K.flagOff, 1)↘] != 0u) { // turned ↙K.k↘
+      ↙nest(ranks, "  ")↘
+      if (↙all(K.cells.map((_, i) => ↖↙r(i)↘ != ↙u(NONE)↘↗))↘) {
+        ↙nest(groups, "    ")↘
+        if (↙all(K.comps.map((C, ci) => ↖T[↙off(C.off, C.size)↘ + ↙m(ci)↘] != 0u↗))↘ && !↙cls↘) {
+          ↙cls↘ = true;
+          if (chance(↙u(R.chanceOff)↘, bitcast<i32>(↙u(R.hash)↘), a * 2 + ↙bit↘)) {
+            ↙nest(writes, "        ")↘
+            if (↙←(K.writes.map((_, j) => ↖unclaimed(↙s(j)↘)↗), " && ")↘) {
+              if (accept) {
+                if (↙←(K.writes.map((_, j) => ↖conf[↙s(j)↘] == 0u↗), " && ")↘) {
+                  ↙nest(K.writes.map((x, j) => ↖put(↙s(j)↘, ↙v(j)↘, ↙u(x.l)↘);↗), "              ")↘
+                }
+              } else {
+                ↙nest(K.writes.map((_, j) => ↖offer(↙s(j)↘, ↙v(j)↘);↗), "            ")↘
+              }
+            }
+          }
+        }
+      }
+    }
+  ↗;
+}
+
+// Where a write's value sits in its table: its groups' indices, mixed
+// radix, the last group fastest.
+function index(K, x) {
+  const terms = [];
+  let mul = 1;
+  for (let d = x.deps.length - 1; d >= 0; d--) {
+    const g = K.comps.indexOf(x.deps[d]);
+    terms.push(mul === 1 ? m(g) : ↖↙m(g)↘ * ↙u(mul)↘↗);
+    mul *= x.deps[d].size;
+  }
+  return terms.length ? ↖↙←(terms, " + ")↘↗ : ↖0u↗;
+}

@@ -1,0 +1,3 @@
+// std: the standard library, all but the modules that add kinds a game
+// may not want (std/palms, std/boats): use them by name.
+use std/frog std/water std/furnace std/rails std/veins std/gates std/ice std/belts std/fuses std/cloners std/trees std/nests std/ants

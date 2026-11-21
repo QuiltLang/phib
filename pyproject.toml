@@ -1,0 +1,15 @@
+[project]
+name = "phib"
+version = "0.1.0"
+description = "Phib, a cellular-automaton language, and Phibber's puzzles"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+phib = "phib:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

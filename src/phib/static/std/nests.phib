@@ -1,0 +1,18 @@
+// std/nests: ore and ingots pushed onto a nest are banked: ore for 1, an
+// ingot for 3.
+use std/frog
+
+type Ground += Nest
+pattern floor += Nest
+reg banked = 0
+
+group 4
+recipe bankore "Bank ore"
+  Nest / Loose(Ore, _)  ->  * / Empty
+  add banked 1
+recipe bankingot "Bank ingot"
+  Nest / Loose(Ingot, _)  ->  * / Empty
+  add banked 3
+
+legend ground n = Nest
+look Nest model "nest"

@@ -1,0 +1,25 @@
+// std/ice: what's pushed onto ice slides until something stops it, and so
+// does Phibber, whose keys do nothing while he slides.
+use std/frog
+
+type Ground += Ice(wind: Dir?)
+pattern floor += Ice
+// What slides: modules add theirs (Frontier's floe).
+pattern slick = Ice
+
+group 1
+recipe slip "Step onto ice"
+  Frog(E, Hop)  slick / Empty  ->  Empty  Frog(E, Slide)
+
+group 4
+recipe slide "Slide"
+  slick / x@Loose(_, E)  hold / Empty  ->  * / Empty  * / x
+recipe skate "Skate"
+  slick / Frog(E, Slide)  floor / Empty  ->  * / Empty  * / Frog(E, Slide)
+
+group 5
+recipe stop "Stop sliding"
+  Frog(E, Slide)  ->  Frog(E, Sit)
+
+legend ground _ = Ice(none)
+look Ice model "ice"

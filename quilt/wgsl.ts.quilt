@@ -1,6 +1,6 @@
 // Phib on the GPU: the WGSL compile-gpu.js runs, written with Quilt quotes.
-// gen.sh expands this into static/wgsl.js (checked in; `just
-// phib-quilt-check` holds them together).
+// gen.sh expands this into static/wgsl.js (checked in; `quilt/gen.sh
+// --check` holds them together).
 //
 // Quilt has no WGSL grammar, so the quotes are `text`: WGSL as text, with
 // ↙…↘ for what varies and ↙←(list, sep)↘ to join. The first quote's ⟨str⟩

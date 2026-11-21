@@ -2,7 +2,7 @@
 
 // Phib, the code compile.js runs: its anchor tests, written
 // with Quilt quotes. gen.sh expands this into static/anchors.js (checked in;
-// `just phib-quilt-check` holds them together), which compileWorld
+// `quilt/gen.sh --check` holds them together), which compileWorld
 // uses as its writer.
 //
 // The first quote's `⟨str⟩` makes every quote here a host string, spliced as

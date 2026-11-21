@@ -1,6 +1,7 @@
-// Phib's page: its puzzles on a 2D board, and the world's recipes as cards
-// you can read, or redraw with the editor and play with your rules instead;
-// and a stress test of its engines (stress.js), automata on a big board.
+// Phib's page: a home (#home) with the puzzles, the stress test and an about;
+// the puzzles on a 2D board, and the world's recipes as cards you can read,
+// or redraw with the editor and play with your rules instead; and a stress
+// test of its engines (stress.js), automata on a big board.
 import { Board } from "./board.js";
 import { SOURCES } from "./content.js";
 import { Palette, recipeCard } from "./editor.js";
@@ -41,6 +42,7 @@ const game = {
   moves: 0,
   won: false,
   editing: !!store.get("editing"),
+  view: "home", // "home", "puzzle" or "stress"
 };
 const board = new Board($("board"));
 const palette = new Palette($("palette"), () => {});
@@ -59,9 +61,19 @@ const stress = new Stress({
 });
 stress.preset = PRESETS[store.get("stress.preset")] ? store.get("stress.preset") : "life";
 
+// Which of the page's views is open: the home, a puzzle, or the stress test.
+function show(view) {
+  game.view = view;
+  $("home").hidden = view !== "home";
+  $("play").hidden = view === "home";
+  $("levels").hidden = view === "home";
+  if (view !== "stress") stress.stop();
+}
+
 function load(id) {
+  if (id === "" || id === "home") return openHome();
   if (id === "stress" || id.startsWith("stress/")) return openStress(id.slice(7));
-  stress.stop();
+  show("puzzle");
   $("puzzleBox").hidden = false;
   $("stressBox").hidden = true;
   $("editing").hidden = false;
@@ -94,6 +106,7 @@ function load(id) {
 // `preset`, from the hash (#stress/ants), or the last one picked.
 function openStress(preset) {
   if (PRESETS[preset]) setPreset(preset);
+  show("stress");
   game.L = null;
   $("puzzleBox").hidden = true;
   $("stressBox").hidden = false;
@@ -102,6 +115,21 @@ function openStress(preset) {
   document.title = "Stress test · Phib";
   tabs();
   stress.reset().then(playing);
+}
+
+// The home: links to each puzzle (✓ once solved) and each stress-test world.
+function openHome() {
+  show("home");
+  game.L = null;
+  if (location.hash && location.hash !== "#home") history.replaceState(null, "", "#home");
+  document.title = "Phib · a Quilt demo";
+  const link = (href, text, cls = "") => Object.assign(document.createElement("a"), { href, textContent: text, className: cls });
+  $("homePuzzles").replaceChildren(
+    ...LEVELS.map((L) => link(`#${L.id}`, `${L.index + 1}. ${L.name}${store.get(`solved.${L.id}`) ? " ✓" : ""}`)),
+  );
+  $("homeStress").replaceChildren(...Object.entries(PRESETS).map(([id, p]) => link(`#stress/${id}`, p.name)));
+  const next = LEVELS.find((L) => !store.get(`solved.${L.id}`)) ?? LEVELS[0];
+  $("homePlay").href = `#${next.id}`;
 }
 
 // The world with the edited recipes in it. If they don't build, the last
@@ -207,6 +235,7 @@ function draw() {
 
 function tabs() {
   $("levels").replaceChildren(
+    Object.assign(document.createElement("a"), { href: "#home", textContent: "← Home", className: "home-tab" }),
     ...LEVELS.map((L) => {
       const b = document.createElement("button");
       b.textContent = `${L.index + 1}. ${L.name}${store.get(`solved.${L.id}`) ? " ✓" : ""}`;
@@ -231,7 +260,7 @@ const hop = (d) => tick({ d, far: false });
 window.addEventListener("keydown", (e) => {
   const t = e.target;
   if (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement || t instanceof HTMLSelectElement) return;
-  if (e.metaKey || e.ctrlKey || e.altKey || !game.L || $("info").open) return;
+  if (e.metaKey || e.ctrlKey || e.altKey || !game.L) return;
   if (KEYS[e.key]) {
     e.preventDefault();
     hop(KEYS[e.key]);
@@ -256,8 +285,6 @@ $("wait").onclick = () => tick(null);
 $("undo").onclick = undo;
 $("restart").onclick = reset;
 $("winNext").onclick = () => load(LEVELS[game.L.index + 1].id);
-$("infoOpen").onclick = () => $("info").showModal();
-$("info").addEventListener("click", (e) => e.target === $("info") && $("info").close());
 $("winStay").onclick = () => ($("win").hidden = true);
 $("editing").onclick = () => {
   game.editing = !game.editing;
@@ -270,7 +297,10 @@ $("restore").onclick = () => {
   rebuild();
   reset();
 };
-addEventListener("resize", () => (game.L ? draw() : stress.playing || stress.draw()));
+addEventListener("resize", () => {
+  if (game.view === "puzzle") draw();
+  else if (game.view === "stress" && !stress.playing) stress.draw();
+});
 
 // The stress test's controls.
 const playing = () => ($("stressPlay").textContent = stress.playing ? "Pause" : "Play");

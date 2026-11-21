@@ -31,7 +31,7 @@ With [Nix](https://nixos.org) and [direnv](https://direnv.net):
 
 ```sh
 direnv allow
-main            # http://127.0.0.1:8150: five puzzles, the editor, the stress test
+main            # http://127.0.0.1:8150: the home page, five puzzles, the editor, the stress test
 test            # the engine's tests, and that the Quilt-expanded modules are fresh
 ```
 

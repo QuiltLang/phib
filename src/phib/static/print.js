@@ -2,7 +2,7 @@
 
 // Phib's printers: values, types, expressions and recipes as Phib text,
 // the language syntax.js reads, written with Quilt quotes. gen.sh expands
-// this into static/print.js (checked in; `just phib-quilt-check` holds them
+// this into static/print.js (checked in; `quilt/gen.sh --check` holds them
 // together), and syntax.js exports what it prints.
 //
 // Quilt has no grammar for Phib, so the quotes are `text`, with ↙…↘ for

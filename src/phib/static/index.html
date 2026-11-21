@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0d0221">
   <title>Phib</title>
-  <meta name="description" content="Phib: a language of recipes over a grid of cells. Play its puzzles, then redraw the rules.">
+  <meta name="description" content="Phib, a Quilt demo: a cellular-automaton language. Play its puzzles, redraw the rules, and race its three engines.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E🐸%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="editor.css">
@@ -13,20 +13,69 @@
 </head>
 <body>
   <header class="top">
-    <div class="title"><h1>Phib</h1><button id="infoOpen" class="info" aria-label="How Phib works" title="How Phib works" aria-haspopup="dialog">i</button></div>
-    <p class="lede">A world is a grid of values, and every rule of it is a <b>recipe</b>: a picture of cells before, and after. Help Phibber the frog to the lotus, then open the rules and redraw them.</p>
+    <a class="title" href="#home"><h1>Phib</h1></a>
+    <p class="subtitle">A <a href="https://github.com/QuiltLang/quilt">Quilt</a> demo: a cellular-automaton language whose compilers are written in Quilt.</p>
     <nav id="levels" class="levels" aria-label="Puzzles"></nav>
   </header>
 
-  <dialog id="info" class="info-box" aria-labelledby="infoTitle">
-    <h2 id="infoTitle">How Phib works</h2>
-    <p><b>A grid of values.</b> Each cell holds a term of an algebraic data type the world declares, such as <code>type Ground += Belt(face: Dir)</code>.</p>
-    <p><b>Rewrite rules.</b> Each recipe is a small picture: cells before, cells after, with variables that bind parts of terms. Every tick, each recipe that matches somewhere, in any of four turns, rewrites those cells.</p>
-    <p><b>One meaning, three engines.</b> An interpreter runs the rules as written. Two compilers turn them into JavaScript and into WGSL for the GPU, their code written in <a href="https://github.com/QuiltLang/quilt">Quilt</a>. All three must make the same boards; the stress test checks.</p>
-    <form method="dialog"><button class="go" autofocus>Got it</button></form>
-  </dialog>
+  <main id="home" class="home" hidden>
+    <p class="lede">A world is a grid of values, and every rule of it is a <b>recipe</b>: a picture of cells before, and after. Play the puzzles, redraw their rules, or race Phib's three engines.</p>
+    <div class="home-grid">
+      <section class="card" aria-labelledby="puzzlesTitle">
+        <h2 id="puzzlesTitle">🐸 Puzzles</h2>
+        <p>Help Phibber the frog to the lotus. Every puzzle is a Phib world, and its recipes are beside the board: open them, redraw a rule, and play with yours instead.</p>
+        <div id="homePuzzles" class="picks"></div>
+        <p><a class="go" id="homePlay" href="#">Play ▶</a></p>
+      </section>
+      <section class="card" aria-labelledby="stressTitle">
+        <h2 id="stressTitle">⚡ Stress test</h2>
+        <p>Automata on a big random board, up to a million cells, run by each engine: the interpreter, the compiler to JavaScript, and the compiler to WGSL on your GPU. Compare checks that all three make the same boards, then times them.</p>
+        <div id="homeStress" class="picks"></div>
+        <p><a class="go" href="#stress">Run it ▶</a></p>
+      </section>
+    </div>
+    <section class="card about" aria-labelledby="aboutTitle">
+      <h2 id="aboutTitle">About</h2>
+      <div class="about-cols">
+      <div>
+      <h3>How Phib works</h3>
+      <p><b>A grid of values.</b> Each cell holds a term of an algebraic data type the world declares, such as <code>type Ground += Belt(face: Dir)</code>.</p>
+      <p><b>Rewrite rules.</b> Each recipe is a small picture: cells before, cells after, with variables that bind parts of terms. Every tick, each recipe that matches somewhere, in any of four turns, rewrites those cells.</p>
+      <p><b>One meaning, three engines.</b> An interpreter runs the rules as written. Two compilers turn them into JavaScript and into WGSL for the GPU. All three must make the same boards; the stress test checks.</p>
+      <pre class="code"><span class="cm">// The primes, by trial division: each number counts its divisors down.</span>
+type C = O | I(Nat&lt;64&gt;, Nat&lt;64&gt;)
+cell C
+recipe count
+  I(n, _)  O  -&gt;  *  I(n + 1, n)
+recipe divide
+  I(n, d)  -&gt;  I(n, d - 1)
+  where n mod d != 0</pre>
+      </div>
+      <div>
+      <h3>Where Quilt comes in</h3>
+      <p><a href="https://github.com/QuiltLang/quilt">Quilt</a> is a metaprogramming language: you write code that writes code with <b>quotes</b>, <code>↖…↗</code>, and splice values into them with <code>↙…↘</code>. Phib's code generators are Quilt, expanded ahead of time into plain JavaScript modules, so the page needs no Quilt at run time:</p>
+      <ul>
+        <li><code>anchors.ts.quilt</code> writes the JavaScript the compiler emits for each recipe's tests.</li>
+        <li><code>wgsl.ts.quilt</code> writes the WGSL compute shader the GPU engine runs.</li>
+        <li><code>print.ts.quilt</code> writes Phib itself: the printers the editor uses to save a redrawn recipe as text.</li>
+      </ul>
+      <pre class="code"><span class="cm">// print.ts.quilt: a Phib type, as written.</span>
+export function printType(ty) {
+  switch (ty.k) {
+    case "Nat":
+      return <q>↖Nat&lt;<s>↙ty.n↘</s>&gt;↗</q>;
+    case "Int":
+      return <q>↖Int&lt;<s>↙ty.lo↘</s>, <s>↙ty.hi↘</s>&gt;↗</q>;
+    case "opt":
+      return <q>↖<s>↙printType(ty.of)↘</s>?↗</q>;
+    …</pre>
+      </div>
+      </div>
+      <p class="note">Source: <a href="https://github.com/QuiltLang/phib">QuiltLang/phib</a>. Quilt: <a href="https://github.com/QuiltLang/quilt">QuiltLang/quilt</a>.</p>
+    </section>
+  </main>
 
-  <main class="layout">
+  <main id="play" class="layout" hidden>
     <section id="puzzleBox" class="play" aria-label="The puzzle">
       <h2 id="name"></h2>
       <p id="intro" class="intro"></p>
